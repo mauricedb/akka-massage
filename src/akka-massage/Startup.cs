@@ -1,6 +1,8 @@
-﻿using akka_massage.Actors;
+﻿using System;
+using akka_massage.Actors;
 using akka_massage.Messages;
 using Akka.Actor;
+using Akka.Event;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -73,6 +75,44 @@ namespace akka_massage
             // Send a message to the actor
             greeter.Tell(new Greet("World"));
             greeter.Tell(new Greet("Akka"));
+
+
+            var builder = system.ActorOf<ScheduleDayActor>();
+            var timeSlots = new[]
+            {
+                new TimeSlot(10, 0),
+                new TimeSlot(10, 20),
+                new TimeSlot(10, 40),
+                new TimeSlot(11, 10),
+            };
+            var masseurs = new[]
+            {
+                new Masseur("Kim"),
+                new Masseur("Linda"),
+            };
+
+            builder.Tell(new BuildSchedule(
+                DateTime.Today,
+                masseurs,
+                timeSlots));
+
+            Console.ReadLine();
+            builder.Tell(new Print());
+
+            builder.Tell(new BookMassage(
+                new Employee("Maurice"),
+                new TimeSlot(11, 11),
+                new Masseur("Kim")));
+
+            //Console.ReadLine();
+            builder.Tell(new BookMassage(
+                new Employee("Erwin"),
+                new TimeSlot(10, 20),
+                new Masseur("Linda")));
+
+
+            Console.ReadLine();
+            builder.Tell(new Print());
 
             return system;
         }
