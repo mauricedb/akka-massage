@@ -9,6 +9,11 @@ namespace akka_massage.Messages
 
         public string Name { get; }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         protected bool Equals(Employee other)
         {
             return string.Equals(Name, other.Name);

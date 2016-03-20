@@ -2,7 +2,6 @@
 using akka_massage.Actors;
 using akka_massage.Messages;
 using Akka.Actor;
-using Akka.Event;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -77,18 +76,20 @@ namespace akka_massage
             greeter.Tell(new Greet("Akka"));
 
 
-            var builder = system.ActorOf<ScheduleDayActor>();
+            var builder = system.ActorOf<ScheduleDayActor>(
+                ScheduleDayActor.ActorName(DateTime.Today));
+
             var timeSlots = new[]
             {
                 new TimeSlot(10, 0),
                 new TimeSlot(10, 20),
                 new TimeSlot(10, 40),
-                new TimeSlot(11, 10),
+                new TimeSlot(11, 10)
             };
             var masseurs = new[]
             {
                 new Masseur("Kim"),
-                new Masseur("Linda"),
+                new Masseur("Linda")
             };
 
             builder.Tell(new BuildSchedule(
@@ -101,12 +102,17 @@ namespace akka_massage
 
             builder.Tell(new BookMassage(
                 new Employee("Maurice"),
-                new TimeSlot(11, 11),
+                new TimeSlot(11, 10),
                 new Masseur("Kim")));
 
             //Console.ReadLine();
             builder.Tell(new BookMassage(
                 new Employee("Erwin"),
+                new TimeSlot(10, 20),
+                new Masseur("Linda")));
+
+            builder.Tell(new BookMassage(
+                new Employee("Maurice"),
                 new TimeSlot(10, 20),
                 new Masseur("Linda")));
 

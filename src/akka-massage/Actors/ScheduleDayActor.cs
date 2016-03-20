@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using akka_massage.Messages;
 using Akka.Actor;
 using Akka.Util.Internal;
@@ -12,7 +9,6 @@ namespace akka_massage.Actors
     {
         public ScheduleDayActor()
         {
-
             Receive<BuildSchedule>(m => HandleBuildSchedule(m));
             Receive<BookMassage>(p => HandleBookMassage(p));
             Receive<Print>(p => HandlePrint(p));
@@ -21,9 +17,9 @@ namespace akka_massage.Actors
 
         private void HandleBookMassage(BookMassage bookMassage)
         {
-            var slotName = SlotName(bookMassage.Masseur, bookMassage.TimeSlot);
+            var slotName = TimeSlotActor.ActorName(bookMassage.Masseur, bookMassage.TimeSlot);
 
-            Context.Child(slotName).Tell(bookMassage);
+            Context.Child(slotName).Forward(bookMassage);
         }
 
         private void HandlePrint(Print print)
@@ -41,8 +37,8 @@ namespace akka_massage.Actors
             {
                 foreach (var timeSlot in buildSchedule.TimeSlots)
                 {
-                    var slotName = SlotName(masseur, timeSlot);
-                    var slot = Context.ActorOf<SlotActor>(slotName);
+                    var slotName = TimeSlotActor.ActorName(masseur, timeSlot);
+                    var slot = Context.ActorOf<TimeSlotActor>(slotName);
                     slot.Tell(new BuildSlot(buildSchedule.Date, masseur, timeSlot));
                 }
             }
@@ -54,9 +50,9 @@ namespace akka_massage.Actors
             Console.WriteLine($"PreStart {GetType().FullName}");
         }
 
-        private string SlotName(Masseur masseur, TimeSlot timeSlot)
+        public static string ActorName(DateTime date)
         {
-            return $"{masseur.Name}-{timeSlot.Hour}:{timeSlot.Minute}";
+            return date.ToString("yyyy-MM-dd");
         }
     }
-};
+}

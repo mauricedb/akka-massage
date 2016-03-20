@@ -12,5 +12,10 @@ namespace akka_massage.Messages
             TimeSlot = timeSlot;
             Masseur = masseur;
         }
+
+        public override string ToString()
+        {
+            return $"Booking massage for {Employee} at {TimeSlot} by {Masseur}";
+        }
     }
 }

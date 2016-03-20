@@ -22,6 +22,11 @@ namespace akka_massage.Messages
             Minute = minute;
         }
 
+        public override string ToString()
+        {
+            return $"{Hour}:{Minute}";
+        }
+
         public int TotalMinutes()
         {
             return 60 * Hour + Minute;

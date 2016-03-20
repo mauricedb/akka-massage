@@ -9,6 +9,11 @@
             Name = name;
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         protected bool Equals(Masseur other)
         {
             return string.Equals(Name, other.Name);

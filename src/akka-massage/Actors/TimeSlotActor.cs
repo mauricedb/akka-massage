@@ -1,21 +1,39 @@
 ﻿using System;
-using System.Threading.Tasks;
 using akka_massage.Messages;
 using Akka.Actor;
+using Akka.Event;
 
 namespace akka_massage.Actors
 {
-    public class SlotActor : ReceiveActor
+    public class TimeSlotActor : ReceiveActor
     {
-        public DateTime StartTime { get; private set; }
-        public Masseur Masseur { get; private set; }
-        public Employee  Employee { get; private set; }
-         
-        public SlotActor()
+        private readonly ILoggingAdapter _log = Context.GetLogger();
+
+        public TimeSlotActor()
         {
             Receive<BuildSlot>(slot => HandleBuildSlot(slot));
-            Receive<BookMassage>(booking => HandleBookMassage(booking));
+            Unbooked();
+        }
+
+        public DateTime StartTime { get; private set; }
+        public Masseur Masseur { get; private set; }
+        public Employee Employee { get; private set; }
+
+        public static string ActorName(Masseur masseur, TimeSlot timeSlot)
+        {
+            return $"{masseur.Name}-{timeSlot.Hour}:{timeSlot.Minute}";
+        }
+
+        private void Unbooked()
+        {
             Receive<Print>(p => HandlePrint(p));
+            Receive<BookMassage>(booking => HandleBookMassage(booking));
+        }
+
+        private void Booked()
+        {
+            Receive<Print>(p => HandlePrint(p));
+            ReceiveAny(m => { _log.Warning("Unhandled message {0}", m); });
         }
 
         private void HandlePrint(Print print)
@@ -26,6 +44,11 @@ namespace akka_massage.Actors
         private void HandleBookMassage(BookMassage booking)
         {
             Employee = booking.Employee;
+
+            _log.Info("Massage booked for {0}, at {1} by {2}",
+                Employee.Name, StartTime, Masseur.Name);
+
+            Become(Booked);
         }
 
         private void HandleBuildSlot(BuildSlot slot)
