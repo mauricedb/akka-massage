@@ -1,0 +1,9 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "src/akka-massage/package.json"
+      ]
+    }
+  }
+}
